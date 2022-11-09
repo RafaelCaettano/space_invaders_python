@@ -20,8 +20,8 @@ class Control():
         first = FirstLevel()
         second = SecondLevel()
         self.levels = [
-            first,
             second,
+            first,
         ]
 
         self.score = 0
@@ -96,6 +96,16 @@ class Control():
     def set_fps(self):
         clock = pg.time.Clock()
         clock.tick(s.FPS)
+
+    def set_hearts(self):
+        self.hearts = []
+        self.hearts_group = Group()
+
+        for i in range(self.spaceship.lives):
+            heart = Heart((i + 1) * 35, 570)
+            self.hearts.append(heart)
+            self.hearts_group.add(heart)
+            self.all_sprites.append(heart)
     
     def draw(self):
         self.shield_group.draw(self.display)
@@ -124,16 +134,6 @@ class Control():
             self.shield_group, 
             True, False
         )
-
-    def set_hearts(self):
-        self.hearts = []
-        self.hearts_group = Group()
-
-        for i in range(self.spaceship.lives):
-            heart = Heart((i + 1) * 35, 570)
-            self.hearts.append(heart)
-            self.hearts_group.add(heart)
-            self.all_sprites.append(heart)
 
     def main(self):
         pg.init()
@@ -164,6 +164,9 @@ class Control():
             self.set_hearts()
 
     def check_game_over(self):
+        if self.levels[self.level].check_end_screen():
+            self.game_over()
+
         if self.spaceship.lives == 0:
             self.game_over()
 

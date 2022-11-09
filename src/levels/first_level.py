@@ -1,5 +1,6 @@
 from characters.alien import AlienHorde
 from pygame.sprite import Group, groupcollide
+import settings as s
 
 class FirstLevel():
     def __init__(self):
@@ -50,6 +51,17 @@ class FirstLevel():
                 spaceship[0].lives -= 1
                 score += -200
 
+        collide_enemy_spaceship = groupcollide(
+            self.aliens_group, 
+            spaceship_group, 
+            True, False
+        )
+        if collide_enemy_shoot_spaceship:
+            for spaceship in collide_enemy_shoot_spaceship.values():
+                hearts[spaceship[0].lives - 1].damage()
+                spaceship[0].lives -= 1
+                score += -200
+
         collide_enemy_shield = groupcollide(
             self.aliens_group, 
             shield_group, 
@@ -86,3 +98,12 @@ class FirstLevel():
     def check_end_level(self):
         if len(self.alien_horde.aliens) == 0:
             self.running = False
+
+    def check_end_screen(self):
+        end_sreen = False
+
+        for alien in self.alien_horde.aliens:
+            if alien.rect.y > s.SCREEN_HEIGHT:
+                end_sreen = True
+        
+        return end_sreen

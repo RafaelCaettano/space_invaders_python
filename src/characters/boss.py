@@ -98,7 +98,7 @@ class AlienBossShoot(Sprite):
             pg.image.load('assets/images/boss_shoot_sprite.png'),
             (70,50)
         ) 
-        self.image = pg.transform.rotate(self.image, 270)
+        self.image = pg.transform.rotate(self.image, 270 + (self.x_rand * 3))
         self.rect = self.image.get_rect(
             center=(x, y + 50)
         )
