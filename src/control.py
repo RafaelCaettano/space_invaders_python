@@ -21,7 +21,6 @@ class Control():
         second = SecondLevel()
         self.levels = [
             second,
-            first,
         ]
 
         self.score = 0
@@ -157,11 +156,14 @@ class Control():
 
     def check_end_level(self):
         if not(self.levels[self.level].running):
-            self.levels[self.level].clear()
-            self.level += 1
-            self.spaceship.lives = 3
-            self.set_shields()
-            self.set_hearts()
+            if len(self.levels) > self.level + 1:
+                self.levels[self.level].clear()
+                self.level += 1
+                self.spaceship.lives = 3
+                self.set_shields()
+                self.set_hearts()
+            else:
+                self.you_win()
 
     def check_game_over(self):
         if self.levels[self.level].check_end_screen():
@@ -215,6 +217,68 @@ class Control():
     def game_over(self):
         font = pg.font.Font('assets/fonts/ChakraPetchBold.ttf', 40)
         game_over_text = font.render('GAME OVER', True, s.WHITE)
+        game_over_text_rect = game_over_text.get_rect()
+        game_over_text_rect.center = (s.SCREEN_WIDTH/2, s.SCREEN_HEIGHT/2 - 150)
+
+        for sprite in self.all_sprites:
+            sprite.kill()
+
+        restart_button = Button(
+            'RESTART', 
+            (325, 250), 
+            (150, 50),
+            20, 
+            s.WHITE,
+            s.BLACK
+        )
+
+        exit_button = Button(
+            'SAIR', 
+            (325, 325), 
+            (150, 50),
+            20, 
+            s.WHITE,
+            s.BLACK
+        )
+
+        self.running = True
+        while self.running:
+            self.set_fps()
+            self.blit_display()
+            self.display.blit(
+                game_over_text, 
+                game_over_text_rect
+            )
+
+            self.display.blit(
+                restart_button.surface, 
+                restart_button.rect
+            )
+
+            self.display.blit(
+                exit_button.surface, 
+                exit_button.rect
+            )
+
+            mouse_pos = pg.mouse.get_pos()
+            mouse_pressed = pg.mouse.get_pressed()
+
+            if restart_button.click(mouse_pos, mouse_pressed):
+                self.new()
+                self.main()
+
+            if exit_button.click(mouse_pos, mouse_pressed):
+                self.running = False
+
+            for event in pg.event.get():  
+                if event.type == QUIT:
+                    self.running = False
+
+            pg.display.update() 
+
+    def you_win(self):
+        font = pg.font.Font('assets/fonts/ChakraPetchBold.ttf', 40)
+        game_over_text = font.render('VOCÊ GANHOU!', True, s.WHITE)
         game_over_text_rect = game_over_text.get_rect()
         game_over_text_rect.center = (s.SCREEN_WIDTH/2, s.SCREEN_HEIGHT/2 - 150)
 
