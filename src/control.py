@@ -8,6 +8,8 @@ from characters.button import Button
 from characters.boss import AlienBoss
 from pygame.sprite import Group, groupcollide
 from pygame.locals import QUIT
+from levels.first_level import FirstLevel
+from levels.second_level import SecondLevel
 
 class Control():
     def __init__(self):
@@ -15,18 +17,21 @@ class Control():
         self.new()
         
     def new(self):
+        first = FirstLevel()
+        second = SecondLevel()
+        self.levels = [
+            first,
+            second,
+        ]
+
         self.score = 0
-        self.lives = 3
         self.shields_count = 4
-        self.level = 1
+        self.level = 0
         self.running = True
-        self.boss = False
-        self.first_time_boss = True 
         self.all_sprites = []
 
         self.set_display()
         self.set_shields()
-        self.set_aliens()
         self.set_spaceship()
         self.set_hearts()
 
@@ -93,21 +98,74 @@ class Control():
         clock.tick(s.FPS)
     
     def draw(self):
-        self.enemies_group.draw(self.display)
         self.shield_group.draw(self.display)
         self.spaceship_group.draw(self.display)
-        self.enemies_shoot_group.draw(self.display)
         self.spaceship_shoot_group.draw(self.display)
         self.hearts_group.draw(self.display)
+        self.levels[self.level].draw(self.display)
     
     def update(self):
-        self.enemies_group.update()
-        self.alien_horde.update()
         self.shield_group.update()
         self.spaceship_group.update()
-        self.enemies_shoot_group.update()
         self.spaceship_shoot_group.update()
         self.hearts_group.update()
+        self.levels[self.level].update()
+
+    def collide(self):
+        self.score += self.levels[self.level].collide(
+            self.spaceship_group,
+            self.spaceship_shoot_group,
+            self.shield_group,
+            self.hearts
+        )
+
+        groupcollide(
+            self.spaceship_shoot_group, 
+            self.shield_group, 
+            True, False
+        )
+
+    def set_hearts(self):
+        self.hearts = []
+        self.hearts_group = Group()
+
+        for i in range(self.spaceship.lives):
+            heart = Heart((i + 1) * 35, 570)
+            self.hearts.append(heart)
+            self.hearts_group.add(heart)
+            self.all_sprites.append(heart)
+
+    def main(self):
+        pg.init()
+        
+        while self.running:
+            self.set_fps()
+            self.blit_display()
+            self.blit_text()
+            self.draw()
+            self.update()
+            self.collide()
+            self.check_end_level()
+            self.check_game_over()
+
+            for event in pg.event.get():  
+                if event.type == QUIT:
+                    self.running = False
+                    pg.quit()
+            
+            pg.display.update() 
+
+    def check_end_level(self):
+        if not(self.levels[self.level].running):
+            self.levels[self.level].clear()
+            self.level += 1
+            self.spaceship.lives = 3
+            self.set_shields()
+            self.set_hearts()
+
+    def check_game_over(self):
+        if self.spaceship.lives == 0:
+            self.game_over()
 
     def tela_inicial(self):
         pg.init()
@@ -211,163 +269,4 @@ class Control():
                 if event.type == QUIT:
                     self.running = False
 
-            pg.display.update() 
-
-    def collide(self):
-        groupcollide(
-            self.spaceship_shoot_group, 
-            self.shield_group, 
-            True, False
-        )
-
-        groupcollide(
-            self.enemies_shoot_group, 
-            self.spaceship_shoot_group, 
-            True, True
-        )
-
-        collide_enemy_shoot_spaceship = groupcollide(
-            self.enemies_shoot_group, 
-            self.spaceship_group, 
-            True, False
-        )
-        if collide_enemy_shoot_spaceship:
-            for spaceship in collide_enemy_shoot_spaceship.values():
-                self.score -= 200
-                self.hearts[self.lives - 1].damage()
-                spaceship[0].lives -= 1
-                self.lives -= 1
-
-                if self.lives <= 0:
-                    self.running = False
-                    self.game_over()
-
-        collide_shoot_enemy = groupcollide(
-            self.spaceship_shoot_group, 
-            self.enemies_group, 
-            True, True
-        )
-        if collide_shoot_enemy:
-            for alien in collide_shoot_enemy.values():
-                self.score += 100
-                self.alien_horde.aliens.remove(alien[0])
-                self.alien_horde.sort_aliens()
-                self.enemies_group.remove(alien[0])
-                alien[0].is_dead()
-
-        collide_enemy_shield = groupcollide(
-            self.enemies_group, 
-            self.shield_group, 
-            True, False
-        )
-        if collide_enemy_shield:
-            for shield in collide_enemy_shield.values():
-                shield[0].damage()
-
-        collide_enemy_shoot_shield = groupcollide(
-            self.enemies_shoot_group, 
-            self.shield_group, 
-            True, False
-        )
-        if collide_enemy_shoot_shield:
-            for shield in collide_enemy_shoot_shield.values():
-                shield[0].damage()
-
-        if self.boss:
-
-            collide_boss_shoot_shield = groupcollide(
-                self.alien_boss_shoot_group, 
-                self.shield_group, 
-                True, False
-            )
-            if collide_boss_shoot_shield:
-                for shield in collide_boss_shoot_shield.values():
-                    shield[0].damage()
-                    print(shield[0].lives)
-
-            collide_boss_shield = groupcollide(
-                self.alien_boss_group, 
-                self.shield_group, 
-                True, False
-            )
-            if collide_boss_shield:
-                for shield in collide_boss_shield.values():
-                    shield[0].damage()
-
-            collide_shoot_boss = groupcollide(
-                self.spaceship_shoot_group, 
-                self.alien_boss_group, 
-                True, False
-            )
-            if collide_shoot_boss:
-                for alien in collide_shoot_boss.values():
-                    self.score += 100
-                    self.alien_boss.damage()
-
-            collide_boss_shoot_spaceship = groupcollide(
-                self.alien_boss_shoot_group, 
-                self.spaceship_group, 
-                True, False
-            )
-            if collide_boss_shoot_spaceship:
-                for spaceship in collide_boss_shoot_spaceship.values():
-                    self.score -= 200
-                    self.hearts[self.lives - 1].damage()
-                    spaceship[0].lives -= 1
-                    self.lives -= 1
-
-                    if self.lives <= 0:
-                        self.running = False
-                        self.game_over()
-
-    def set_hearts(self):
-        self.hearts = []
-        self.hearts_group = Group()
-
-        for i in range(self.lives):
-            heart = Heart((i + 1) * 35, 570)
-            self.hearts.append(heart)
-            self.hearts_group.add(heart)
-            self.all_sprites.append(heart)
-
-    def teste(self):
-        for alien in self.alien_horde.aliens:
-            self.enemies_group.remove(alien)
-
-        for shield in self.shield_group:
-            shield.kill()
-
-        self.alien_horde.aliens.clear()
-
-    def verify_number_aliens(self):
-        if len(self.alien_horde.aliens) == 0:
-            self.alien_boss_group.draw(self.display)
-            self.alien_boss_shoot_group.draw(self.display)
-            self.alien_boss.update()
-            self.alien_boss_shoot_group.update()
-            self.boss = True
-        
-        if self.first_time_boss:
-            self.set_alien_boss()
-            self.set_hearts()
-            self.set_shields()
-            self.first_time_boss = False
-
-    def main(self):
-        pg.init()
-        #self.teste()
-        while self.running:
-            self.set_fps()
-            self.blit_display()
-            self.blit_text()
-            self.draw()
-            self.update()
-            self.collide()
-            self.verify_number_aliens()
-
-            for event in pg.event.get():  
-                if event.type == QUIT:
-                    self.running = False
-                    pg.quit()
-            
             pg.display.update() 

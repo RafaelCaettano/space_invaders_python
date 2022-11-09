@@ -29,7 +29,7 @@ class AlienBoss(Sprite):
         self.dead = True
     
     def damage(self):
-        self.dead -= 1
+        self.lives -= 1
     
     def move(self):
         if not(self.dead):
