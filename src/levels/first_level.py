@@ -48,7 +48,7 @@ class FirstLevel():
         if collide_enemy_shoot_spaceship:
             for spaceship in collide_enemy_shoot_spaceship.values():
                 hearts[spaceship[0].lives - 1].damage()
-                spaceship[0].lives -= 1
+                spaceship[0].damage()
                 score += -200
 
         collide_enemy_spaceship = groupcollide(
@@ -56,10 +56,10 @@ class FirstLevel():
             spaceship_group, 
             True, False
         )
-        if collide_enemy_shoot_spaceship:
-            for spaceship in collide_enemy_shoot_spaceship.values():
+        if collide_enemy_spaceship:
+            for spaceship in collide_enemy_spaceship.values():
                 hearts[spaceship[0].lives - 1].damage()
-                spaceship[0].lives -= 1
+                spaceship[0].damage()
                 score += -200
 
         collide_enemy_shield = groupcollide(
@@ -100,10 +100,10 @@ class FirstLevel():
             self.running = False
 
     def check_end_screen(self):
-        end_sreen = False
+        end_screen = False
 
         for alien in self.alien_horde.aliens:
             if alien.rect.y > s.SCREEN_HEIGHT:
-                end_sreen = True
+                end_screen = True
         
-        return end_sreen
+        return end_screen

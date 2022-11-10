@@ -10,6 +10,7 @@ from pygame.sprite import Group, groupcollide
 from pygame.locals import QUIT
 from levels.first_level import FirstLevel
 from levels.second_level import SecondLevel
+from levels.third_level import ThirdLevel
 
 class Control():
     def __init__(self):
@@ -19,7 +20,10 @@ class Control():
     def new(self):
         first = FirstLevel()
         second = SecondLevel()
+        third = ThirdLevel()
         self.levels = [
+            third,
+            first,
             second,
         ]
 
