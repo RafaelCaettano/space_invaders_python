@@ -8,7 +8,7 @@ class AsteroidsLevel():
         super().__init__()
         
         self.running = True
-        self.asteroids_counter = 300
+        self.asteroids_counter = 150
         self.asteroids = []
         self.reset_shield = False
         self.reset_hearts = True
@@ -23,13 +23,15 @@ class AsteroidsLevel():
             current_timer = time.time()
             current_time = round(
                 current_timer - self.inicial_asteroid_timer, 
-                1
+                2
             )
+            
             if current_time == 1.5:
-                asteroid = Asteroid()
-                self.asteroids.append(asteroid)
-                self.asteroids_group.add(asteroid)
-                self.asteroids_counter -= 1
+                for i in range(0, 6):
+                    asteroid = Asteroid()
+                    self.asteroids.append(asteroid)
+                    self.asteroids_group.add(asteroid)
+                    self.asteroids_counter -= 1
             elif current_time > 1.5:
                 self.inicial_asteroid_timer = current_timer
 
@@ -46,6 +48,17 @@ class AsteroidsLevel():
 
     def collide(self, spaceship_group, spaceship_shoot_group, shield_group, hearts):
         score = 0
+
+        collide_asteroid_spaceship = groupcollide(
+            self.asteroids_group, 
+            spaceship_group, 
+            True, False
+        )
+        if collide_asteroid_spaceship:
+            for spaceship in collide_asteroid_spaceship.values():
+                hearts[spaceship[0].lives - 1].damage()
+                spaceship[0].damage()
+                score += -200
 
         collide_spaceship_shoot_asteroid = groupcollide(
             spaceship_shoot_group, 
