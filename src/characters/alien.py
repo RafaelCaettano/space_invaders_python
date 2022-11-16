@@ -35,15 +35,6 @@ class Alien(Sprite):
                 1
             )
 
-            if self.first_move and current_time > 1:
-                self.inicial_move_timer = current_timer
-                self.first_move = False
-            
-            current_time = round(
-                current_timer - self.inicial_move_timer, 
-                1
-            )
-
             if current_time == 4 or current_time == 2:
                 self.rect.y += self.speed / 2
 

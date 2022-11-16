@@ -2,11 +2,16 @@ from characters.alien import AlienHorde
 from pygame.sprite import Group, groupcollide
 import settings as s
 
-class FirstLevel():
+class HordeLevel():
     def __init__(self):
         super().__init__()
         
         self.running = True
+        self.reset_shield = True
+        self.reset_hearts = True
+        self.has_shields = True
+        self.spaceship_free = False
+        self.victory = False
         self.set_aliens()
 
     def set_aliens(self):
@@ -97,6 +102,7 @@ class FirstLevel():
 
     def check_end_level(self):
         if len(self.alien_horde.aliens) == 0:
+            self.victory = True
             self.running = False
 
     def check_end_screen(self):

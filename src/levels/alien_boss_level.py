@@ -2,11 +2,16 @@ from pygame.sprite import Group, groupcollide
 from characters.boss import AlienBoss
 import settings as s
 
-class SecondLevel():
+class AlienBossLevel():
     def __init__(self):
         super().__init__()
         
         self.running = True
+        self.reset_shield = True
+        self.reset_hearts = True
+        self.has_shields = True
+        self.spaceship_free = False
+        self.victory = False
         self.set_alien_boss()
     
     def set_alien_boss(self):
@@ -75,6 +80,7 @@ class SecondLevel():
     def check_end_level(self):
         if self.alien_boss.lives == 0:
             self.running = False
+            self.victory = True
 
     def check_end_screen(self):
         end_sreen = self.alien_boss.rect.y > s.SCREEN_HEIGHT

@@ -2,77 +2,64 @@ import pygame as pg
 import settings as s
 from characters.shield import Shield
 from characters.spaceship import Spaceship
-from characters.alien import AlienHorde
 from characters.heart import Heart
-from characters.button import Button
-from characters.boss import AlienBoss
 from pygame.sprite import Group, groupcollide
 from pygame.locals import QUIT
-from levels.first_level import FirstLevel
-from levels.second_level import SecondLevel
-from levels.third_level import ThirdLevel
+from levels.horde_level import HordeLevel
+from levels.alien_boss_level import AlienBossLevel
+from levels.asteroids_level import AsteroidsLevel
+from components.label import Label
+from display import Display
+from screens.initial_screen import InitialScreen
+from screens.game_over_screen import GameOverScreen
+from screens.victory_screen import VictoryScreen
 
 class Control():
     def __init__(self):
-        super().__init__()
-        self.new()
+        self.display = Display()
+        self.screen = InitialScreen()
         
     def new(self):
-        first = FirstLevel()
-        second = SecondLevel()
-        third = ThirdLevel()
-        self.levels = [
-            third,
-            first,
-            second,
-        ]
-
         self.score = 0
-        self.shields_count = 4
-        self.level = 0
+        self.level_number = 0
         self.running = True
         self.all_sprites = []
 
-        self.set_display()
-        self.set_shields()
+        self.set_levels()
+        self.display.set_display()
         self.set_spaceship()
+        self.set_shields()
         self.set_hearts()
 
-    def set_display(self):
-        self.display = pg.display.set_mode(s.SCREEN_SIZE, pg.RESIZABLE)
-        self.background = pg.transform.scale(
-            pg.image.load('assets/images/background.jpg'),
-            s.SCREEN_SIZE
-        )   
-    
-    def blit_display(self):
-        self.display.blit(
-            self.background, 
-            (0, 0)
-        )  
+    def set_levels(self):
+        first = HordeLevel()
+        second = AsteroidsLevel()
+        third = AlienBossLevel()
+        self.levels = [
+            first,
+            second,
+            third,
+        ]
 
-    def blit_text(self):
-        font = pg.font.Font(s.FONT, 18)
-        text = font.render('SCORE ' + str(self.score), True, s.WHITE)
-        text_rect = text.get_rect()
-        text_rect.center = (60, 30)
-
-        self.display.blit(
-            text, 
-            text_rect
-        )
+        self.level = self.levels[self.level_number]
 
     def set_shields(self):
         self.shields = []
         self.shield_group = Group()
 
-        last_shield_x = 133.32
-        for i in range(self.shields_count):
-            shield = Shield(last_shield_x, 400)
-            self.shield_group.add(shield)
-            self.shields.append(shield)
-            self.all_sprites.append(shield)
-            last_shield_x += 177.76
+        if self.level.has_shields:
+            self.shields_count = 4
+            last_shield_x = 133.32
+            for i in range(self.shields_count):
+                shield = Shield((last_shield_x, 400))
+                self.shield_group.add(shield)
+                self.shields.append(shield)
+                self.all_sprites.append(shield)
+                last_shield_x += 177.76
+        else:
+            self.shields_count = 0
+            self.shields = []
+            self.shield_group.empty()
 
     def set_spaceship(self):
         self.spaceship_shoot_group = Group()
@@ -80,71 +67,68 @@ class Control():
         self.spaceship_group = Group(self.spaceship)
         self.all_sprites.append(self.spaceship)
 
-    def set_alien_boss(self):
-        self.alien_boss_shoot_group = Group()
-        self.alien_boss = AlienBoss(self.alien_boss_shoot_group, 400, 0)
-        self.alien_boss_group = Group(self.alien_boss)
-        self.all_sprites.append(self.alien_boss)
-
-    def set_aliens(self):
-        self.alien_horde = AlienHorde()
-        self.enemies_group = Group()
-        self.enemies_shoot_group = Group()
-        alien_horde = self.alien_horde.alien_group(self.enemies_shoot_group, 3)
-        self.enemies_group.add(alien_horde)
-        for alien_row in alien_horde:
-            for alien in alien_row:
-                self.all_sprites.append(alien)
-
-    def set_fps(self):
-        clock = pg.time.Clock()
-        clock.tick(s.FPS)
-
     def set_hearts(self):
-        self.hearts = []
-        self.hearts_group = Group()
-
-        for i in range(self.spaceship.lives):
-            heart = Heart((i + 1) * 35, 570)
-            self.hearts.append(heart)
-            self.hearts_group.add(heart)
-            self.all_sprites.append(heart)
+        if self.level.reset_hearts:
+            self.hearts = []
+            self.hearts_group = Group()
+            self.spaceship.lives = 3
+            for i in range(self.spaceship.lives):
+                heart = Heart((i + 1) * 35, 570)
+                self.hearts.append(heart)
+                self.hearts_group.add(heart)
+                self.all_sprites.append(heart)
     
     def draw(self):
-        self.shield_group.draw(self.display)
-        self.spaceship_group.draw(self.display)
-        self.spaceship_shoot_group.draw(self.display)
-        self.hearts_group.draw(self.display)
-        self.levels[self.level].draw(self.display)
+        self.shield_group.draw(self.display.screen)
+        self.spaceship_group.draw(self.display.screen)
+        self.spaceship_shoot_group.draw(self.display.screen)
+        self.hearts_group.draw(self.display.screen)
+        self.level.draw(self.display.screen)
     
     def update(self):
         self.shield_group.update()
-        self.spaceship_group.update()
+        self.spaceship_group.update(self.level.spaceship_free)
         self.spaceship_shoot_group.update()
         self.hearts_group.update()
-        self.levels[self.level].update()
+        self.level.update()
 
     def collide(self):
-        self.score += self.levels[self.level].collide(
+        self.score += self.level.collide(
             self.spaceship_group,
             self.spaceship_shoot_group,
             self.shield_group,
             self.hearts
         )
 
-        groupcollide(
-            self.spaceship_shoot_group, 
-            self.shield_group, 
-            True, False
+        self.shield_collide()
+
+    def shield_collide(self):
+        if self.level.has_shields:
+            groupcollide(
+                self.spaceship_shoot_group, 
+                self.shield_group, 
+                True, False
+            )
+
+    def show_score(self):
+        score_label = Label(
+            'SCORE ' + str(self.score),
+            18,
+            (60, 30),
+            s.WHITE
         )
+            
+        self.display.blit_text(score_label)
 
     def main(self):
-        pg.init()
-        
+        self.screen.load(self.start)
+
+    def start(self):
+        self.new()
         while self.running:
-            self.set_fps()
-            self.blit_display()
-            self.blit_text()
+            self.display.set_fps()
+            self.display.blit_display()
+            self.show_score()
             self.draw()
             self.update()
             self.collide()
@@ -159,185 +143,33 @@ class Control():
             pg.display.update() 
 
     def check_end_level(self):
-        if not(self.levels[self.level].running):
-            if len(self.levels) > self.level + 1:
-                self.levels[self.level].clear()
-                self.level += 1
-                self.spaceship.lives = 3
-                self.set_shields()
-                self.set_hearts()
+        if not(self.level.running) and self.level.victory:
+            if len(self.levels) > self.level_number + 1:
+                self.next_level()
             else:
-                self.you_win()
+                self.victory()
 
     def check_game_over(self):
-        if self.levels[self.level].check_end_screen():
+        if self.level.check_end_screen():
             self.game_over()
 
         if self.spaceship.lives == 0:
             self.game_over()
 
-    def tela_inicial(self):
-        pg.init()
-        font = pg.font.Font(s.FONT, 40)
-        title_text = font.render('SPACE INVADERS', True, s.WHITE)
-        title_text_rect = title_text.get_rect()
-        title_text_rect.center = (s.SCREEN_WIDTH/2, s.SCREEN_HEIGHT/2 - 150)
-
-        play_button = Button(
-            'JOGAR', 
-            (325, 250), 
-            (150, 50),
-            20, 
-            s.WHITE,
-            s.BLACK
-        )
-
-        self.running = True
-        while self.running:
-            self.set_fps()
-            self.blit_display()
-            self.display.blit(
-                title_text, 
-                title_text_rect
-            )
-
-            self.display.blit(
-                play_button.surface, 
-                play_button.rect
-            )
-
-            mouse_pos = pg.mouse.get_pos()
-            mouse_pressed = pg.mouse.get_pressed()
-
-            if play_button.click(mouse_pos, mouse_pressed):
-                self.main()
-
-            for event in pg.event.get():  
-                if event.type == QUIT:
-                    self.running = False
-
-            pg.display.update() 
+    def next_level(self):
+        self.level.clear()
+        self.level_number += 1
+        self.level = self.levels[self.level_number]
+        self.set_spaceship()
+        self.set_shields()
+        self.set_hearts()
 
     def game_over(self):
-        font = pg.font.Font('assets/fonts/ChakraPetchBold.ttf', 40)
-        game_over_text = font.render('GAME OVER', True, s.WHITE)
-        game_over_text_rect = game_over_text.get_rect()
-        game_over_text_rect.center = (s.SCREEN_WIDTH/2, s.SCREEN_HEIGHT/2 - 150)
+        self.screen = GameOverScreen()
+        self.main()
 
-        for sprite in self.all_sprites:
-            sprite.kill()
+    def victory(self):
+        self.screen = VictoryScreen()
+        self.main()
 
-        restart_button = Button(
-            'RESTART', 
-            (325, 250), 
-            (150, 50),
-            20, 
-            s.WHITE,
-            s.BLACK
-        )
-
-        exit_button = Button(
-            'SAIR', 
-            (325, 325), 
-            (150, 50),
-            20, 
-            s.WHITE,
-            s.BLACK
-        )
-
-        self.running = True
-        while self.running:
-            self.set_fps()
-            self.blit_display()
-            self.display.blit(
-                game_over_text, 
-                game_over_text_rect
-            )
-
-            self.display.blit(
-                restart_button.surface, 
-                restart_button.rect
-            )
-
-            self.display.blit(
-                exit_button.surface, 
-                exit_button.rect
-            )
-
-            mouse_pos = pg.mouse.get_pos()
-            mouse_pressed = pg.mouse.get_pressed()
-
-            if restart_button.click(mouse_pos, mouse_pressed):
-                self.new()
-                self.main()
-
-            if exit_button.click(mouse_pos, mouse_pressed):
-                self.running = False
-
-            for event in pg.event.get():  
-                if event.type == QUIT:
-                    self.running = False
-
-            pg.display.update() 
-
-    def you_win(self):
-        font = pg.font.Font('assets/fonts/ChakraPetchBold.ttf', 40)
-        game_over_text = font.render('VOCÊ GANHOU!', True, s.WHITE)
-        game_over_text_rect = game_over_text.get_rect()
-        game_over_text_rect.center = (s.SCREEN_WIDTH/2, s.SCREEN_HEIGHT/2 - 150)
-
-        for sprite in self.all_sprites:
-            sprite.kill()
-
-        restart_button = Button(
-            'RESTART', 
-            (325, 250), 
-            (150, 50),
-            20, 
-            s.WHITE,
-            s.BLACK
-        )
-
-        exit_button = Button(
-            'SAIR', 
-            (325, 325), 
-            (150, 50),
-            20, 
-            s.WHITE,
-            s.BLACK
-        )
-
-        self.running = True
-        while self.running:
-            self.set_fps()
-            self.blit_display()
-            self.display.blit(
-                game_over_text, 
-                game_over_text_rect
-            )
-
-            self.display.blit(
-                restart_button.surface, 
-                restart_button.rect
-            )
-
-            self.display.blit(
-                exit_button.surface, 
-                exit_button.rect
-            )
-
-            mouse_pos = pg.mouse.get_pos()
-            mouse_pressed = pg.mouse.get_pressed()
-
-            if restart_button.click(mouse_pos, mouse_pressed):
-                self.new()
-                self.main()
-
-            if exit_button.click(mouse_pos, mouse_pressed):
-                self.running = False
-
-            for event in pg.event.get():  
-                if event.type == QUIT:
-                    self.running = False
-
-            pg.display.update() 
+    
