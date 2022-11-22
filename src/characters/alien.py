@@ -16,7 +16,6 @@ class Alien(Sprite):
 
         self.shoots = shoots
         self.dead = False
-        self.first_move = True
         self.inicial_move_timer = time.time()
         self.physics()
 

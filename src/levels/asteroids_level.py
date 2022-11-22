@@ -8,7 +8,7 @@ class AsteroidsLevel():
         super().__init__()
         
         self.running = True
-        self.asteroids_counter = 50
+        self.asteroids_counter = 20
         self.asteroids = []
         self.reset_shield = False
         self.reset_hearts = True
@@ -32,6 +32,7 @@ class AsteroidsLevel():
                     asteroid = Asteroid()
                     self.asteroids.append(asteroid)
                     self.asteroids_group.add(asteroid)
+                    print(self.asteroids_counter)
             elif current_time > 1.5:
                 self.inicial_asteroid_timer = current_timer
 
@@ -60,6 +61,10 @@ class AsteroidsLevel():
                 score += -200
                 spaceship[0].damage()
 
+            for asteroid in collide_asteroid_spaceship.keys():
+                asteroid.destroy()
+                self.asteroids_group.remove(asteroid)
+
         collide_spaceship_shoot_asteroid = groupcollide(
             spaceship_shoot_group, 
             self.asteroids_group, 
@@ -77,8 +82,8 @@ class AsteroidsLevel():
         all_destroyed = False
         for asteroid in self.asteroids:
             all_destroyed = asteroid.destroyed
-
-        if 0 >= self.asteroids_counter and all_destroyed:
+            
+        if self.asteroids_counter <= 0 and all_destroyed:
             self.running = False
             self.victory = True
 

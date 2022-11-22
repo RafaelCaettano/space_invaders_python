@@ -55,6 +55,7 @@ class Asteroid(Sprite):
 
     def destroy(self):
         self.destroyed = True
+        print('des')
         self.kill()
 
     def update(self):
@@ -63,4 +64,3 @@ class Asteroid(Sprite):
 
         if self.rect.y < -100 or self.rect.x < -100:
             self.destroy()
-
