@@ -8,7 +8,7 @@ class AsteroidsLevel():
         super().__init__()
         
         self.running = True
-        self.asteroids_counter = 20
+        self.asteroids_counter = 40
         self.asteroids = []
         self.reset_shield = False
         self.reset_hearts = True
@@ -32,7 +32,6 @@ class AsteroidsLevel():
                     asteroid = Asteroid()
                     self.asteroids.append(asteroid)
                     self.asteroids_group.add(asteroid)
-                    print(self.asteroids_counter)
             elif current_time > 1.5:
                 self.inicial_asteroid_timer = current_timer
 
@@ -79,9 +78,12 @@ class AsteroidsLevel():
         return score
 
     def check_end_level(self):
-        all_destroyed = False
+        destroyed_count = 0
         for asteroid in self.asteroids:
-            all_destroyed = asteroid.destroyed
+            if asteroid.destroyed:
+                destroyed_count += 1
+                
+        all_destroyed = destroyed_count == len(self.asteroids)
             
         if self.asteroids_counter <= 0 and all_destroyed:
             self.running = False

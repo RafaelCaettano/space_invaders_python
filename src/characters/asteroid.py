@@ -55,12 +55,11 @@ class Asteroid(Sprite):
 
     def destroy(self):
         self.destroyed = True
-        print('des')
         self.kill()
 
     def update(self):
         self.rect.y += self.speed_y
         self.rect.x += self.speed_x
 
-        if self.rect.y < -100 or self.rect.x < -100:
+        if self.rect.y < -100 or self.rect.x < -100 or self.rect.y > s.SCREEN_HEIGHT + 100 or self.rect.x > s.SCREEN_WIDTH + 100:
             self.destroy()
