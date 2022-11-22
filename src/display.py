@@ -6,7 +6,7 @@ class Display():
     def set_display(self):
         self.screen = pg.display.set_mode(s.SCREEN_SIZE, pg.RESIZABLE)
         self.background = pg.transform.scale(
-            pg.image.load('assets/images/background.jpg'),
+            pg.image.load('src/assets/images/background.jpg'),
             s.SCREEN_SIZE
         )   
     

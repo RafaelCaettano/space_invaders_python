@@ -16,13 +16,13 @@ class AlienBossLevel():
     
     def set_alien_boss(self):
         self.alien_boss_shoot_group = Group()
-        self.alien_boss = AlienBoss(self.alien_boss_shoot_group, 400, 0)
+        self.alien_boss = AlienBoss(self.alien_boss_shoot_group, (400, 0))
         self.alien_boss_group = Group(self.alien_boss)
 
     def clear(self):
         self.alien_boss_shoot_group.empty()
         self.alien_boss_group.empty()
-        self.alien_boss = AlienBoss(self.alien_boss_shoot_group, 400, 0)
+        self.alien_boss = AlienBoss(self.alien_boss_shoot_group, (400, 0))
     
     def update(self):
         self.alien_boss_group.update()

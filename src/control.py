@@ -36,9 +36,9 @@ class Control():
         second = AsteroidsLevel()
         third = AlienBossLevel()
         self.levels = [
+            third,
             second,
             first,
-            third,
         ]
 
         self.level = self.levels[self.level_number]
@@ -73,7 +73,7 @@ class Control():
             self.hearts_group = Group()
             self.spaceship.lives = 3
             for i in range(self.spaceship.lives):
-                heart = Heart((i + 1) * 35, 570)
+                heart = Heart(((i + 1) * 35, 570))
                 self.hearts.append(heart)
                 self.hearts_group.add(heart)
                 self.all_sprites.append(heart)

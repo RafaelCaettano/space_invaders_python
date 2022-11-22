@@ -2,18 +2,18 @@ import pygame as pg
 from pygame.sprite import Sprite
 from random import randint
 import time
+from tools import sprite_tools as st
 
 class Alien(Sprite):
-    def __init__(self, shoots, x, y):
+    def __init__(self, shoots, position):
         super().__init__()
 
-        self.image = pg.transform.scale(
-            pg.image.load('assets/images/alien_sprite.png'),
-            (22,30)
-        )            
-        self.rect = self.image.get_rect(
-            center=(x,y)
-        )
+        self.image = st.get_sprite(
+            'alien_sprite',
+            (22, 30)
+        ) 
+        self.rect = st.rect_sprite(self.image, position)
+
         self.shoots = shoots
         self.dead = False
         self.first_move = True
@@ -48,24 +48,22 @@ class Alien(Sprite):
     def shoot(self):
         if not(self.dead):
             self.shoots.add(
-                AlienShoot(*self.rect.center)
+                AlienShoot(self.rect.center)
             )
     
     def update(self):
         self.move()
 
 class AlienShoot(Sprite):
-    def __init__(self, x, y):
+    def __init__(self, position):
         super().__init__()
 
-        self.image = pg.transform.scale(
-            pg.image.load('assets/images/alien_shoot_sprite.png'),
-            (30,15)
+        self.image = st.get_sprite(
+            'alien_shoot_sprite',
+            (30, 15),
+            270
         ) 
-        self.image = pg.transform.rotate(self.image, 270)
-        self.rect = self.image.get_rect(
-            center=(x, y)
-        )
+        self.rect = st.rect_sprite(self.image, position)
 
     def update(self):
         self.rect.y += 7
@@ -101,7 +99,7 @@ class AlienHorde():
         
         for i in range(50, lines * 75, 75):
             for j in range(100, 700, 65):
-                alien = Alien(group, j, i)
+                alien = Alien(group, (j, i))
                 self.aliens.append(alien)
                 aliens_row.append(
                     alien

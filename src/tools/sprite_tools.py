@@ -28,15 +28,15 @@ def get_sprite(sprite_name, size, rotate=0):
 
     return sprite
 
-def rect_sprite(sprite, rect):
-    x, y = rect
-    return pg.Rect(x, y, 15, 35)
+# def rect_sprite(sprite, rect):
+#     x, y = rect
+#     return pg.Rect(x, y, 15, 35)
     
 
-# def rect_sprite(sprite, rect):
-#     return sprite.get_rect(
-#         center=(rect)
-#     )
+def rect_sprite(sprite, rect):
+    return sprite.get_rect(
+        center=(rect)
+    )
 
 def rotate_sprite(sprite, rotate):
     return pg.transform.rotate(sprite, rotate)

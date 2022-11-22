@@ -1,20 +1,19 @@
 import pygame as pg
 from pygame.sprite import Sprite
+from tools import sprite_tools as st
 
 class Heart(Sprite):
-    def __init__(self, x, y):
+    def __init__(self, position):
         super().__init__()
-
-        self.image = pg.transform.scale(
-            pg.image.load('assets/images/heart.png'),
+        
+        self.image = st.get_sprite(
+            'heart',
             (30,30)
-        )                  
-        self.rect = self.image.get_rect(
-            center=(x,y)
-        )  
+        ) 
+        self.rect = st.rect_sprite(self.image, position)
 
     def damage(self):
-        self.image = pg.transform.scale(
-            pg.image.load('assets/images/black_heart.png'),
+        self.image = st.get_sprite(
+            'black_heart',
             (30,30)
-        )               
+        )           
