@@ -1,11 +1,13 @@
 import pygame as pg
 from pygame.sprite import Sprite
+from tools import font_tools as ft
+import settings as s
 
 class Button(Sprite):
     def __init__(self, text,  pos, size, font, color, background):
         self.x, self.y = pos
         self.w, self.h = size
-        self.font = pg.font.Font("src/assets/fonts/ChakraPetchBold.ttf", font)
+        self.font = pg.font.Font(ft.FONTS[s.FONT], font)
         self.change_text(text, background, size, color)
  
     def change_text(self, text, background, size, color):

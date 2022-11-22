@@ -8,7 +8,6 @@ from display import Display
 class InitialScreen():
     def __init__(self):
         self.display = Display()
-        self.start = False
         self.new()
 
     def new(self):

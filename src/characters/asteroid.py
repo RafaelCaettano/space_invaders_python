@@ -20,8 +20,6 @@ class Asteroid(Sprite):
         self.speed_x = 2
         self.destroyed = False
 
-        rand = randint(1, 4)
-
         if randint(1, 2) == 1:
             direction = -1
         else:
@@ -29,6 +27,8 @@ class Asteroid(Sprite):
 
         x = 0
         y = 0
+
+        rand = randint(1, 4)
         if rand == 1:
             y = -20
             x += randint(200, 600)
@@ -56,7 +56,6 @@ class Asteroid(Sprite):
     def destroy(self):
         self.destroyed = True
         self.kill()
-
 
     def update(self):
         self.rect.y += self.speed_y

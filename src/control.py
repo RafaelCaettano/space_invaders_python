@@ -36,9 +36,9 @@ class Control():
         second = AsteroidsLevel()
         third = AlienBossLevel()
         self.levels = [
+            first,
             third,
             second,
-            first,
         ]
 
         self.level = self.levels[self.level_number]

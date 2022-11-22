@@ -12,7 +12,7 @@ WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 
 # Fonte Padrão
-FONT = 'src/assets/fonts/ChakraPetchBold.ttf'
+FONT = 'ChakraPetchBold'
 
 controls = {
     pg.K_UP: {

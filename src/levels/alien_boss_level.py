@@ -83,5 +83,5 @@ class AlienBossLevel():
             self.victory = True
 
     def check_end_screen(self):
-        end_sreen = self.alien_boss.rect.y > s.SCREEN_HEIGHT
-        return end_sreen
+        end_screen = self.alien_boss.rect.y > s.SCREEN_HEIGHT
+        return end_screen
